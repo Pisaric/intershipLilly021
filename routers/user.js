@@ -1,35 +1,37 @@
+const config = require('config');
 const _ = require('lodash');
+const asyncMiddleware = require('../middleware/async')
 const express = require('express');
 const router = express.Router();
-const { User, validate } = require('../models/users.js');
+const { User, validate } = require('../models/user.js');
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const config = require('config');
+const auth = require('../middleware/auth.js');
 
-
-router.get('/', auth, async (req, res) => {
-    const user = await User.findById(req.user._id).select('-password');
+//fali auth
+router.get('/', auth ,async (req, res) => {
+    const user = await User.findById(req.body._id).select('-password');
     res.send(user);
-})
-
+});
 
 router.post('', async (req, res) => {
     const { error } = validate(req.body);
     if(error) return res.status(400).send(error.details[0].message);
+  
+    let user = User.findOne({ email: req.body.email });
+    if(!user) return res.status(400).send('User already registred.');
 
-    let user = User.findOne({ email: req.body.email })
-    if(user) return res.status(400).send('User already registred.')
-
-    user = User.findOne({ username: req.body.username })
-    if(user) return res.status(400).send('User already registred.')
+    user = User.findOne({ username: req.body.username });
+    if(!user) return res.status(400).send('User already registred.');
 
     user = new User(
-        _.pick(req.body, ['name', 'email', 'password'])
+        _.pick(req.body, ['name', 'email', 'password', 'username', 'surname'])
     )
-    const salt = await bcrypt.genSalt(10);
-    const hashed = await bcrypt.hash(user.password, salt);
- 
+
+  //  const salt = await bcrypt.genSalt(10);
+  //  const hashed = await bcrypt.hash(user.password, salt);
+
     let = await user.save();
 
     const token = jwt.sign({ _id: user._id}, config.get('jwtPrivateKey'));
