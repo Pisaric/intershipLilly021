@@ -1,25 +1,37 @@
 const mongoose = require('mongoose');
-const Joi = require('joi');
 
 const gameSchema = new mongoose.Schema({
-    type:
-    {
-        type: String,
-        require: true,
-        enum: ['multiplayer', 'singleplayer']
+    board: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'Board'
     },
-    status:
-    {
-        type: String,
-        require: true,
-        enum: ['inprogress', 'iksWinner', 'oksWinner', 'draw']
+    xPlayer: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'User'
     },
-    iksPlayer:
-    {
-
+    yPlayer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null   
     },
-    oksPlayer: 
-    {
-
+    winner: { 
+        type: String, 
+        enum: [null, 'X', 'O'], 
+        default: null 
+    },
+    isDraw: { 
+        type: Boolean,
+        default: false 
+    },
+    result: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: 'Result'
     }
 });
+
+const Game = mongoose.model('Games', gameSchema);
+
+module.exports = TicTacToe;

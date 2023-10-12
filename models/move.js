@@ -4,35 +4,37 @@ const jwt = require('jsonwebtoken');
 const config = require('config');
 
 const moveSchema = new mongoose.Schema({
-    game: {
+    gameId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Game'    
+        ref: 'Game',
+        required: true    
     },
-    idPlayer: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+    row: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 2
     },
-    move:
-    {
-        type: Number
+    col: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 2
     }
 });
 
 const Move = new mongoose.model('Moves', moveSchema);
 
-
-function validateUser(user)
+function validateMove(move)
 {
-    const schema = {
-        name: Joi.string().required(),
-        surname: Joi.string().required(),
-        username: Joi.string().min(5).required(),
-        password: Joi.string().min(5).required(),
-        email: Joi.string().min(5).required()
-    };
+    const schema = Joi.object({
+        gameId: Joi.ObjectId().required(),
+        row: Joi.number().min(0).max(2).required,
+        col: Joi.number().min(0).max(2).required
+    });
 
-    return Joi.validate(user, schema);
+    return schema.assert(move);
 }
 
-exports.User = User;
-exports.validate = validateUser;
+exports.Move = Move;
+exports.validate = validateMove;

@@ -1,78 +1,70 @@
-class Board {
-    constructor() {
-      this.grid = Array(3).fill(null).map(() => Array(3).fill(null));
+const mongoose = require('mongoose');
+
+const boardSchema = new mongoose.Schema({
+    board: [
+        [{ type: String, enum: [null, 'X', 'O'], default: null }],
+        [{ type: String, enum: [null, 'X', 'O'], default: null }],
+        [{ type: String, enum: [null, 'X', 'O'], default: null }]
+    ],
+    currentPlayer: {
+        type: String, 
+        enum: ['X', 'O'], 
+        default: 'X' 
+    },
+    winner: { 
+        type: String,
+        enum: [null, 'X', 'O'],
+        default: null 
+    },
+    isDraw: {
+        type: Boolean,
+         default: false 
     }
-  
-    // Make a move (X or O) on the board
-    makeMove(row, col, player) {
-      if (this.grid[row][col] === null) {
-        this.grid[row][col] = player;
-        return true; // Move successful
-      }
-      return false; // Invalid move
+});
+
+function isFinished(board){
+    for(let row = 0; row < 3; row++) {
+        for(let col = 0; col < 3; col++)
+        {
+            if(board[row][col] === null)
+            {
+                return false;
+            }
+        }
     }
-  
-    // Check if the game is over (win, draw, or ongoing)
-    isGameOver() {
-      return this.isWin('X') || this.isWin('O') || this.isDraw();
-    }
-  
-    // Check if the game is a draw
-    isDraw() {
-      for (let row = 0; row < 3; row++) {
-        for (let col = 0; col < 3; col++) {
-          if (this.grid[row][col] === null) {
-            return false; // The game is not a draw
-          }
+    return true;
+}
+
+function checkWinner(board) {
+    for (let i = 0; i < 3; i++) {
+      if (board[i][0] === board[i][1] && board[i][1] === board[i][2]) {
+        if (board[i][0] !== null) {
+          return board[i][0];
         }
       }
-      return true; // The game is a draw
-    }
-  
-    // Check if a player has won
-    isWin(player) {
-      // Check rows, columns, and diagonals
-      for (let i = 0; i < 3; i++) {
-        if (
-          this.grid[i][0] === player &&
-          this.grid[i][1] === player &&
-          this.grid[i][2] === player
-        ) {
-          return true; // Row win
-        }
-        if (
-          this.grid[0][i] === player &&
-          this.grid[1][i] === player &&
-          this.grid[2][i] === player
-        ) {
-          return true; // Column win
+      if (board[0][i] === board[1][i] && board[1][i] === board[2][i]) {
+        if (board[0][i] !== null) {
+          return board[0][i]; 
         }
       }
-      if (
-        this.grid[0][0] === player &&
-        this.grid[1][1] === player &&
-        this.grid[2][2] === player
-      ) {
-        return true; // Diagonal win (top-left to bottom-right)
-      }
-      if (
-        this.grid[0][2] === player &&
-        this.grid[1][1] === player &&
-        this.grid[2][0] === player
-      ) {
-        return true; // Diagonal win (top-right to bottom-left)
-      }
-      return false; // No win
     }
   
-    // Get the current state of the board
-    getState() {
-      return this.grid;
+    if (board[0][0] === board[1][1] && board[1][1] === board[2][2]) {
+      if (board[0][0] !== null) {
+        return board[0][0]; 
+      }
+    }
+    if (board[0][2] === board[1][1] && board[1][1] === board[2][0]) {
+      if (board[0][2] !== null) {
+        return board[0][2]; 
+      }
     }
   
-    // Reset the board to an empty state
-    reset() {
-      this.grid = Array(3).fill(null).map(() => Array(3).fill(null));
-    }
+    return null;  //draw
   }
   
+const Board = mongoose.model('Boards', boardSchema);
+
+exports.Board = Board;
+exports.isFinished = isFinished;
+exports.checkWinner = checkWinner;
