@@ -18,20 +18,20 @@ router.get('/', async (req, res) => {
     res.send(game);
 });
 
-/*
-router.post('/', async (req, res) => {
-    const { error } = validate(req.body);
-    if(error) return res.status(400).send(error.details[0].message);
 
-    let move = new Move(
-        _.pick(req.body, ['gameId', 'row', 'col'])
+router.post('/', auth ,async (req, res) => {
+    //const { error } = validate(req.body);
+    //if(error) return res.status(400).send(error.details[0].message);
+
+    let game = new Game(
+        _.pick(req.body, ['board', 'xPlayer', 'type'])
     )
 
-    let createdMove = await move.save();
+    let createdGame = await game.save();
 
-    res.header().send(createdMove);
+    res.header().send(createdGame);
 });
-
+/*
 router.put('/:id', async (req, res) => {
     let move = await Move.findById(req.params.id);
     if(!move)

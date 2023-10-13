@@ -4,6 +4,8 @@ const asyncMiddleware = require('../middleware/async')
 const express = require('express');
 const router = express.Router();
 const { Move, validate } = require('../models/move.js');
+const { Board, validateBoard, isFinished, checkWinner, isMoveValid, nextPlayer } = require('../models/board.js');
+const { Game } = require('../models/game.js');
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -16,7 +18,7 @@ router.get('/', async (req, res) => {
 });
 
 
-router.post('/', async (req, res) => {
+router.post('/', auth, async (req, res) => {
     const { error } = validate(req.body);
     if(error) return res.status(400).send(error.details[0].message);
 
@@ -25,9 +27,40 @@ router.post('/', async (req, res) => {
     )
 
     let createdMove = await move.save();
-
+    drawMove(createdMove);
     res.header().send(createdMove);
 });
+
+async function drawMove(move) {
+    let game = await Game.findById(move.gameId);
+    let board = await Board.findById(game.board);
+    
+    if(!isMoveValid(board, move)) {
+        return false;
+    }
+    board.board[move.row][move.col] = board.currentPlayer;
+
+    const winner = checkWinner(board.board);
+    if(winner === null) {
+        board.currentPlayer = nextPlayer(board);    
+    } else if(winner === 'X') {
+        console.log('X is winner');
+        board.winner = 'X';
+    } else {
+        console.log('O is winner');
+        board.winner = 'O';
+    }
+
+    if(isFinished(board.board))
+    {
+        console.log('DRAW');
+        board.isDraw = true;
+    }
+    
+    let newBoard = board.save();
+    return true;
+}
+
 
 router.put('/:id', async (req, res) => {
     let move = await Move.findById(req.params.id);

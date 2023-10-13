@@ -81,10 +81,23 @@ function checkWinner(board) {
   
     return null;  //draw
   }
+
+function isMoveValid(board, move) {
+  if(board.board[move.row][move.col] !== null) {
+    return false;
+  }
+  return true;
+}
   
+function nextPlayer(board) {
+  return board.currentPlayer === 'X' ? 'O' : 'X';
+}
+
 const Board = mongoose.model('Boards', boardSchema);
 
 exports.Board = Board;
 exports.validate = validateBoard;
 exports.isFinished = isFinished;
 exports.checkWinner = checkWinner;
+exports.isMoveValid = isMoveValid;
+exports.nextPlayer = nextPlayer;
