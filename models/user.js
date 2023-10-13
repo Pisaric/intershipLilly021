@@ -46,9 +46,6 @@ userSchema.methods.generateAuthToken = function()
     return token;
 }
 
-const validationOptions = {
-    abortEarly: false, // This option prevents Joi from returning after the first validation error.
-  };
 
 function validateUser(user)
 {

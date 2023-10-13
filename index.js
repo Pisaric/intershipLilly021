@@ -6,7 +6,10 @@ const Joi = require('joi');
 Joi.objectId = require('joi-objectid')(Joi);
 const mongoose = require('mongoose');
 const users = require('./routers/user');
-const auth = require('./routers/auth')
+const boards = require('./routers/board');
+const moves = require('./routers/move');
+const games = require('./routers/game');
+const auth = require('./routers/auth');
 const express = require('express');
 const app = express();
 
@@ -22,7 +25,10 @@ mongoose.connect('mongodb+srv://milos:milos@cluster0.5ybabm5.mongodb.net/intersh
 
 app.use(express.json());
 app.use('/api/users', users);
-app.use('/api/auth', auth)
+app.use('/api/boards', boards);
+app.use('/api/moves', moves);
+app.use('/api/games', games);
+app.use('/api/auth', auth);
 
 app.use(error); //ovo nije poziv fje nego ref na tu fju
 

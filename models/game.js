@@ -1,17 +1,19 @@
 const mongoose = require('mongoose');
+const Joi = require('joi');
+const { join } = require('lodash');
+const { Board } = require('./board');
 
 const gameSchema = new mongoose.Schema({
     board: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'Board'
+        ref: 'Boards'
     },
     xPlayer: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'User'
+    //    required: true,
+        ref: 'Users'
     },
-    yPlayer: {
+    oPlayer: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         default: null   
@@ -27,11 +29,16 @@ const gameSchema = new mongoose.Schema({
     },
     result: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
         ref: 'Result'
+    },
+    type: {
+        tpye: String,
+        enum: ['multiplayer', 'singleplayer'],
     }
 });
 
+
+
 const Game = mongoose.model('Games', gameSchema);
 
-module.exports = TicTacToe;
+module.exports.Game = Game;

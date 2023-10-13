@@ -6,7 +6,7 @@ const config = require('config');
 const moveSchema = new mongoose.Schema({
     gameId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Game',
+        ref: 'Games',
         required: true    
     },
     row: {
@@ -28,12 +28,12 @@ const Move = new mongoose.model('Moves', moveSchema);
 function validateMove(move)
 {
     const schema = Joi.object({
-        gameId: Joi.ObjectId().required(),
-        row: Joi.number().min(0).max(2).required,
-        col: Joi.number().min(0).max(2).required
+        gameId: Joi.string().required(),
+        row: Joi.number().min(0).max(2).required(),
+        col: Joi.number().min(0).max(2).required()
     });
 
-    return schema.assert(move);
+    return schema.validate(move);
 }
 
 exports.Move = Move;
