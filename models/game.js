@@ -1,25 +1,44 @@
 const mongoose = require('mongoose');
 const Joi = require('joi');
+const { join } = require('lodash');
+const { Board } = require('./board');
 
 const gameSchema = new mongoose.Schema({
-    type:
-    {
-        type: String,
-        require: true,
-        enum: ['multiplayer', 'singleplayer']
+    board: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Boards'
     },
-    status:
-    {
-        type: String,
-        require: true,
-        enum: ['inprogress', 'iksWinner', 'oksWinner', 'draw']
+    xPlayer: {
+        type: mongoose.Schema.Types.ObjectId,
+    //    required: true,
+        ref: 'Users'
     },
-    iksPlayer:
-    {
-
+    oPlayer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null   
     },
-    oksPlayer: 
-    {
-
+    winner: { 
+        type: String, 
+        enum: [null, 'X', 'O'], 
+        default: null 
+    },
+    isDraw: { 
+        type: Boolean,
+        default: false 
+    },
+    result: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Result'
+    },
+    type: {
+        tpye: String,
+        enum: ['multiplayer', 'singleplayer'],
     }
 });
+
+
+
+const Game = mongoose.model('Games', gameSchema);
+
+module.exports.Game = Game;

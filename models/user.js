@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Joi = require('joi');
 const jwt = require('jsonwebtoken');
 const config = require('config');
+const { join } = require('lodash');
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -32,26 +33,33 @@ const userSchema = new mongoose.Schema({
 
 });
 
-const User = new mongoose.model('User', userSchema);
+const User = new mongoose.model('Users', userSchema);
 
-userSchema.methods.generateAuthToken = fucntion()
+function generateAuthToken(user)
+{
+    return jwt.sign({ _id: user._id}, config.get('jwtPrivateKey'));
+}
+
+userSchema.methods.generateAuthToken = function()
 {
     const token = jwt.sign({ _id: this._id}, config.get('jwtPrivateKey'));
     return token;
 }
 
+
 function validateUser(user)
 {
-    const schema = {
+    const schema = Joi.object({
         name: Joi.string().required(),
         surname: Joi.string().required(),
         username: Joi.string().min(5).required(),
         password: Joi.string().min(5).required(),
-        email: Joi.string().min(5).required()
-    }
+        email: Joi.string().min(5).required().email()
+    });
 
-    return Joi.validate(user, schema);
+    return schema.validate(user);
 }
 
 exports.User = User;
 exports.validate = validateUser;
+exports.generateAuthToken = generateAuthToken;
