@@ -10,7 +10,7 @@ const mongoose = require('mongoose')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth.js');
-
+const { makeBotMove } = require('../service/bot');
 
 router.get('/', async (req, res) => {
     const move = await Move.findById(req.body._id).populate('gameId');
@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
 });
 
 
-router.post('/', auth, async (req, res) => {
+router.post('/singlePlayer', auth, async (req, res) => {
     const { error } = validate(req.body);
     if(error) return res.status(400).send(error.details[0].message);
 
@@ -28,6 +28,19 @@ router.post('/', auth, async (req, res) => {
 
     let createdMove = await move.save();
     drawMove(createdMove);
+
+    let game = await Game.findById(move.gameId);
+    let board = await Board.findById(game.board);
+    let botMove = makeBotMove(board.board);
+    
+    let newMove = new Move(
+        _.pick(req.body, ['gameId'])
+    );
+    
+    newMove.row = botMove.row;
+    newMove.col = botMove.col;
+    drawMove(newMove);
+
     res.header().send(createdMove);
 });
 
