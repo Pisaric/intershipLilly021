@@ -31,6 +31,19 @@ router.post('/', auth ,async (req, res) => {
 
     res.header().send(createdGame);
 });
+
+router.put('/join/:id', auth, async (req, res) => {
+    let game = await Game.findById(req.params.id);
+    if(!game) return res.status(404).send('The game with the given Id was not found');
+    if(!game) return res.status(400).send('The game with the given ID is not multiplayer.');
+    if(!game) return res.status(400).send('Someone already joined in game.');
+
+    game.oPlayer = req.body._id;
+    const updatedGame = await game.save();
+
+    res.header().send(updatedGame);
+});
+
 /*
 router.put('/:id', async (req, res) => {
     let move = await Move.findById(req.params.id);

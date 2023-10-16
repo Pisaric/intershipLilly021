@@ -32,7 +32,6 @@ router.post('/', async (req, res) => {
 
 function validateCredential(credential)
 {
-    console.log(credential);
     const schema = Joi.object({
         password: Joi.string().min(5).required(),
         email: Joi.string().min(5).required()
