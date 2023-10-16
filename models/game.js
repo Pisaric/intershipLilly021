@@ -32,7 +32,7 @@ const gameSchema = new mongoose.Schema({
         ref: 'Result'
     },
     type: {
-        tpye: String,
+        type: String,
         enum: ['multiplayer', 'singleplayer'],
     }
 });

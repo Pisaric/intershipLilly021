@@ -19,14 +19,19 @@ router.get('/', async (req, res) => {
 });
 
 
-router.post('/', auth ,async (req, res) => {
+router.post('/', auth, async (req, res) => {
     //const { error } = validate(req.body);
     //if(error) return res.status(400).send(error.details[0].message);
 
-    let game = new Game(
-        _.pick(req.body, ['board', 'xPlayer', 'type'])
+    let board = new Board(
+        _.pick(req.body, ['xPlayer'])
     )
+    board = await board.save();
 
+    let game = new Game(
+        _.pick(req.body, ['xPlayer', 'type'])
+    )
+    game.board = board._id;
     let createdGame = await game.save();
 
     res.header().send(createdGame);

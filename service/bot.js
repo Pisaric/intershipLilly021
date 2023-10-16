@@ -69,7 +69,7 @@ function makeBotMove(board) {
         }
     }
 
-    return bestMove;
+    return bestMove
     //board[bestMove.row][bestMove.col] = 'O';
 // Implement the logic to update the UI with the bot's move
 }
