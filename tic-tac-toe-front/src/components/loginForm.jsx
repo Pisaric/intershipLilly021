@@ -1,70 +1,182 @@
-import React, { Component } from 'react';
-import Input from './input';
+import React, { Component } from "react";
 import Joi from 'joi-browser';
-import config from '../config.json'
-import { login } from '../services/authService'
+import Input from "./common/input";
+import { login } from "../services/authService";
 
-class LoginForm extends Component {
+class loginForm extends Component {
     state = {
-        account: 
-        {
-            email: '',
-            password: ''
+        data: {
+            email: "",
+            password: ""
         },
         errors: {}
-        
     };
 
-    schema = {
-        email: Joi.string().required(),
-        password: Joi.string().required()
-    };
+    schema = Joi.object({
+        email: Joi.string()
+                  .email()
+                  .required()
+                  .label('Email'),
+        password: Joi.string()
+                     .required()
+                     .label('Password'),
+    });
 
-    validate = () => {
-        return this.schema.validate(this.state.account);
-    }
-
-    handlerSubmit = e => {
+    handlerSumbit = async (e) => {
         e.preventDefault();
 
-        const errors= this.validate();
-        this.setState({ errors });
+        //Pozovi server
+        const errors = this.validate();
+        this.setState({ errors: errors || {} });
         if(errors) return;
+        try {
+            const { data } = this.state;
+            await login(data.email, data.password);
+            window.location.reload(false);
+           // this.setState({ data });
+           //props.history.push("/singleplayer");
+        } catch(ex) {
 
-        const email = this.username.current.value;
-        console.log("Submitted");
-    };
-
+        }
+    }
+    
+    
+    
     handleChange = ({ currentTarget: input }) => {
-        const account = {...this.state.account };
-        account[input.name] = input.value;
-        this.setState({ account });
-    };
+
+        const data = {...this.state.data};
+        data[input.name] = input.value;
+
+        this.setState({ data });
+    }
+
+    validate = () => {
+        const options = { abortEarly: false };
+        const { error } = Joi.validate(this.state.data, this.schema, options);
+        if(!error) return null;
+
+        const errors = {};
+        for(let item of error.details) errors[item.path[0]] = item.message;
+
+        return errors;
+    }
+
+    validateProperty = ({name, value}) => {
+        const obj = { [name]: value };
+        const schema = { [name]: this.schema[name] };
+        const {error} = Joi.validate(obj, schema, {abortEarly: false});
+        if(error) return null;
+        return error.details[0].message;
+    }
+
 
     render() { 
-        const { account, errors } = this.state;
+        const {data, errors} = this.state;
 
-        return ( 
-            <div>
-                <h1>Login</h1>
-                <form>
+
+        return (
+        <div className="container">
+            <div className="row">
+                <div className="col-md-6 mx-auto">
+                <form onSubmit={this.handlerSumbit} className="text-center"> 
+                    <div className="form-group">
                     <Input 
                         name="email"
-                        value={account.email}
+                        value={data.email}
                         label="Email"
                         onChange={this.handleChange}
-                        error={errors.email}/>
-                    <Input name="password"
-                        value={account.password}
+                        error={errors.email}
+                    />
+                    </div>
+                    <div className="form-group">
+                    <Input 
+                        name="password"
+                        value={data.password}
                         label="Password"
                         onChange={this.handleChange}
-                        error={errors.password}/>
-                    <button type="submit" className="btn btn-primary">Submit</button>
+                        error={errors.password}
+                    />
+                    </div>
+                    <div className="form-group mt-3">
+                    <button 
+                        disabled={this.validate()}
+                        type="submit" 
+                        className="btn btn-primary"
+                    >
+                        Submit
+                    </button>
+                    </div>
                 </form>
+                <p className="text-center mt-3">Not a member? <a href="/register">Register</a></p>
+                </div>
             </div>
-
+        </div>
         );
     }
 }
  
-export default LoginForm;
+export default loginForm;
+
+
+/*
+                <form onSubmit={this.handlerSumbit}>
+                    <Input 
+                        name="email"
+                        value={data.email}
+                        label="Email"
+                        onChange={this.handleChange}
+                        error={errors.email}
+                    />
+                    <Input 
+                        name="password"
+                        value={data.password}
+                        label="Password"
+                        onChange={this.handleChange}
+                        error={errors.password}
+                    />
+                    <button 
+                        disabled={this.validate()}
+                        type="submit" 
+                        className="btn btn-primary">Submit
+                    </button>
+                </form>
+*/
+
+/*
+<div className="container">
+                <div className="row">
+                    <div className="col-md-6 mx-auto">
+                    <form onSubmit={this.handlerSubmit} className="text-center"> 
+                        <div className="form-group">
+                        <Input 
+                            name="email"
+                            value={data.email}
+                            label="Email"
+                            onChange={this.handleChange}
+                            error={errors.email}
+                        />
+                        </div>
+                        <div className="form-group">
+                        <Input 
+                            name="password"
+                            value={data.password}
+                            label="Password"
+                            onChange={this.handleChange}
+                            error={errors.password}
+                        />
+                        </div>
+                        <div className="form-group mt-3">
+                        <button 
+                            disabled={this.validate()}
+                            type="submit" 
+                            className="btn btn-primary"
+                        >
+                            Submit
+                        </button>
+                        </div>
+                    </form>
+                    <p className="text-center mt-3">Not a member? <a href="/register">Register</a></p>
+                    </div>
+                </div>
+            </div>
+*/

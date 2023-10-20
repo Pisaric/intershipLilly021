@@ -18,6 +18,15 @@ router.get('/', async (req, res) => {
     res.send(game);
 });
 
+router.get('/allForUser', async (req, res) => {
+    const games = await Game.find({
+        $or: [
+          { xPlayer: req.body.playerId },
+          { oPlayer: req.body.playerId },
+        ],
+      }).populate('xPlayer').populate('oPlayer');
+    res.send(games);
+});
 
 router.post('/', auth, async (req, res) => {
     //const { error } = validate(req.body);
@@ -31,10 +40,12 @@ router.post('/', auth, async (req, res) => {
     let game = new Game(
         _.pick(req.body, ['xPlayer', 'type'])
     )
+    
     game.board = board._id;
     let createdGame = await game.save();
 
-    res.header().send(createdGame);
+
+    res.header().send(await Game.findById(createdGame._id).populate('board'));
 });
 
 router.put('/join/:id', auth, async (req, res) => {

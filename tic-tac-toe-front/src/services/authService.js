@@ -1,7 +1,7 @@
+import jwtDecode from "jwt-decode";
 import http from "./httpService";
-import { apiUrl } from "../config.json";
 
-const apiEndpoint = apiUrl + "/auth";
+const apiEndpoint = "http://localhost:3000/api/auth";
 const tokenKey = "token";
 
 export async function login(email, password) {
@@ -15,6 +15,7 @@ export function loginWihtJWT(jwt) {
 
 export function logout() {
     localStorage.removeItem(tokenKey);
+    window.location.reload(false);
 }
 
 export function getCurrentUser() {
@@ -32,3 +33,4 @@ export default {
     logout,
     getCurrentUser
 }
+
