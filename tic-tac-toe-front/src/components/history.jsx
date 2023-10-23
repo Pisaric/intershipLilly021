@@ -13,12 +13,14 @@ class History extends Component {
     async componentDidMount() {
         let { games } = this.state;
         const playerId = getCurrentUser()._id;
-        console.log(playerId);
         await http.get(apiEndpoint + "games/allForUser", {
             params: { playerId }})
             .then(res => {
                 games = res.data;
                 this.setState({ games });
+            })
+            .catch(ex => {
+
             });
     }
 
@@ -61,6 +63,7 @@ class History extends Component {
         
         return (
             <React.Fragment>
+
                 { this.displayList() }
             </React.Fragment>
         );

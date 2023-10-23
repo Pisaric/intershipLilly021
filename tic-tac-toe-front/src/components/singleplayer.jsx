@@ -1,5 +1,4 @@
 import React, {Component} from "react";
-import TicTacToeBoard from "./board";
 import http from "../services/httpService";
 import { getCurrentUser } from "../services/authService";
 import "./style/board.css"
@@ -28,6 +27,17 @@ class SinglePlayer extends Component {
         });
         
     }
+    
+    displayResult = () => {
+        let { board } = this.state;
+        if(board.isDraw) {
+            return <h2>DRAW</h2>;
+        } else if(board.winner === 'X') {
+            return <h2>X is winner</h2>;
+        } else if(board.winner === 'O'){
+            return <h2>O is winner</h2>
+        }
+    }
 
     handleClick = async (row, col) => {
         let { board } = this.state;
@@ -54,11 +64,15 @@ class SinglePlayer extends Component {
         let { board } = this.state;
         const gameId = this.state.newGame._id;
         await http.post(apiEndpoint + "moves/botplay", {gameId}).then(res => {
+            console.log('uradio');
             board = res.data;
             this.setState({ board });
+            console.log('prikazao');
+        }).catch(ex => {
+            console.log(ex);
         });
     }
- 
+    
 
     displayBoard = () => {
         let {newGame, board} = this.state;
@@ -86,16 +100,6 @@ class SinglePlayer extends Component {
         );
     }
 
-    displayResult = () => {
-        let { board } = this.state;
-        if(board.isDraw) {
-            return <h2>DRAW</h2>;
-        } else if(board.winner === 'X') {
-            return <h2>X is winner</h2>;
-        } else if(board.winner === 'O'){
-            return <h2>O is winner</h2>
-        }
-    }
 
     displayButton = () => {
         let { newGame, board } = this.state;
@@ -104,7 +108,6 @@ class SinglePlayer extends Component {
     }
 
     render() { 
-        let { newGame, board } = this.state;
         return (
             <div className="container text-center">
                 <h1>SinglePlayer</h1>
