@@ -42,7 +42,7 @@ router.post('/multiPlayer', auth, async (req, res) => {
 router.post('/botplay', async (req, res) => {
     let game = await Game.findById(req.body.gameId);
     let board = await Board.findById(game.board);
-    let botMove = makeBotMove(board.board);
+    let botMove = await makeBotMove(board.board);
     
     let newMove = new Move(
         _.pick(req.body, ['gameId'])
@@ -50,9 +50,9 @@ router.post('/botplay', async (req, res) => {
 
     newMove.row = botMove.row;
     newMove.col = botMove.col;
-    newMove.save();
+    await newMove.save();
     const retVal = await drawMove(newMove);
-    console.log(retVal);
+  
     
     if(!retVal.isValid) {
         console.log('ovde');
@@ -65,7 +65,7 @@ router.post('/botplay', async (req, res) => {
     }
     */
     let newBoard = await Board.findById(game.board);
-    console.log(newBoard);
+   
     return res.header().send(newBoard);
 });
 
@@ -100,7 +100,6 @@ async function drawMove(move) {
     let board = await Board.findById(game.board);
     
     if(!isMoveValid(board, move)) {
-        console.log("evo me tu sam");
         retMessage.isValid = false;
         retMessage.message = 'Move is not valid.';
         return retMessage;
@@ -115,6 +114,7 @@ async function drawMove(move) {
         retMessage.isValid = true;
         retMessage.message = 'X is winner.';
         board.winner = 'X';
+        game.winner = 'X';
     //    board.save();
     //    return retMessage;
     } else {
@@ -122,6 +122,7 @@ async function drawMove(move) {
         retMessage.isValid = true;
         retMessage.message = 'O is winner.';
         board.winner = 'O';
+        game.winner = 'O';
     //   board.save();
     //    return retMessage;
     }
@@ -132,11 +133,13 @@ async function drawMove(move) {
         retMessage.isValid = true;
         retMessage.message = 'Draw.';
         board.isDraw = true;
+        game.isDraw = true;
     //    board.save();
     //    return retMessage;
     }
     
-    let newBoard = board.save();
+    await game.save();
+    await board.save();
     
     return retMessage;
 }
