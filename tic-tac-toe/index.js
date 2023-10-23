@@ -10,6 +10,7 @@ const boards = require('./routers/board');
 const moves = require('./routers/move');
 const games = require('./routers/game');
 const auth = require('./routers/auth');
+const cors = require('cors');
 const express = require('express');
 const app = express();
 
@@ -23,12 +24,19 @@ mongoose.connect('mongodb+srv://milos:milos@cluster0.5ybabm5.mongodb.net/intersh
     .then(() => console.log('Connected to MongoDB'))
     .catch(err => console.log('Could not connect to MongoDB...'));
 
+const corsOptions = {
+    origin: '*',
+};
+    
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use('/api/users', users);
 app.use('/api/boards', boards);
 app.use('/api/moves', moves);
 app.use('/api/games', games);
 app.use('/api/auth', auth);
+
 
 app.use(error); //ovo nije poziv fje nego ref na tu fju
 

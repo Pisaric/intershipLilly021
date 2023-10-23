@@ -9,7 +9,6 @@ const { Game } = require('../models/game.js');
 
   
   
-  // Minimax algorithm with alpha-beta pruning
 function minimax(board, depth, maximizingPlayer) {
     if (isFinished(board)) {
         if (checkWinner(board)) {
@@ -50,7 +49,6 @@ function minimax(board, depth, maximizingPlayer) {
     }
 }
 
-  // Function to make the bot's move
 function makeBotMove(board) {
     let bestMove;
     let bestScore = -Infinity;
@@ -70,8 +68,6 @@ function makeBotMove(board) {
     }
 
     return bestMove
-    //board[bestMove.row][bestMove.col] = 'O';
-// Implement the logic to update the UI with the bot's move
 }
 
 exports.makeBotMove = makeBotMove;

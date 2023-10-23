@@ -39,6 +39,36 @@ router.post('/multiPlayer', auth, async (req, res) => {
     res.header().send(createdMove);
 });
 
+router.post('/botplay', async (req, res) => {
+    let game = await Game.findById(req.body.gameId);
+    let board = await Board.findById(game.board);
+    let botMove = await makeBotMove(board.board);
+    
+    let newMove = new Move(
+        _.pick(req.body, ['gameId'])
+    );
+
+    newMove.row = botMove.row;
+    newMove.col = botMove.col;
+    await newMove.save();
+    const retVal = await drawMove(newMove);
+  
+    
+    if(!retVal.isValid) {
+        console.log('ovde');
+        return res.status(400).send(retVal.message);
+    }
+    /*
+    if(retVal.isValid && retVal.message !== '') {
+        console.log('ovde1')
+        return res.status(200).send(retVal.message);
+    }
+    */
+    let newBoard = await Board.findById(game.board);
+   
+    return res.header().send(newBoard);
+});
+
 router.post('/singlePlayer', auth, async (req, res) => {
     const { error } = validate(req.body);
     if(error) return res.status(400).send(error.details[0].message);
@@ -48,38 +78,20 @@ router.post('/singlePlayer', auth, async (req, res) => {
     )
 
     let createdMove = await move.save();
-    let retVal = await drawMove(createdMove);
+    const retVal = await drawMove(createdMove);
 
     if(!(retVal.isValid)) {
         return res.status(400).send(retVal.message);
     }
-
+    /*
     if(retVal.isValid && retVal.message !== '') {
         return res.status(200).send(retVal.message);
     }
-
+    */
     let game = await Game.findById(move.gameId);
     let board = await Board.findById(game.board);
-    let botMove = makeBotMove(board.board);
-    
-    let newMove = new Move(
-        _.pick(req.body, ['gameId'])
-    );
-    
-    newMove.row = botMove.row;
-    newMove.col = botMove.col;
-    retVal = await drawMove(newMove);
-    
-    if(!retVal.isValid) {
-        console.log('ovde');
-        return res.status(400).send(retVal.message);
-    }
-    
-    if(retVal.isValid && retVal.message !== '') {
-        return res.status(200).send(retVal.message);
-    }
 
-    res.header().send(createdMove);
+    res.header().send(board);
 });
 
 async function drawMove(move) {
@@ -102,13 +114,17 @@ async function drawMove(move) {
         retMessage.isValid = true;
         retMessage.message = 'X is winner.';
         board.winner = 'X';
-        return retMessage;
+        game.winner = 'X';
+    //    board.save();
+    //    return retMessage;
     } else {
         console.log('O is winner');
         retMessage.isValid = true;
         retMessage.message = 'O is winner.';
         board.winner = 'O';
-        return retMessage;
+        game.winner = 'O';
+    //   board.save();
+    //    return retMessage;
     }
 
     if(isFinished(board.board))
@@ -117,10 +133,14 @@ async function drawMove(move) {
         retMessage.isValid = true;
         retMessage.message = 'Draw.';
         board.isDraw = true;
-        return retMessage;
+        game.isDraw = true;
+    //    board.save();
+    //    return retMessage;
     }
     
-    let newBoard = board.save();
+    await game.save();
+    await board.save();
+    
     return retMessage;
 }
 
