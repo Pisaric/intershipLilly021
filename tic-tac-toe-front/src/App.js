@@ -10,11 +10,18 @@ import Multiplayer from "./components/multiplayer";
 import History from "./components/history";
 import JoinInGame from './components/join';
 //import RegiserForm from "./components/register";
+import io from 'socket.io-client';
 
 class App extends Component {
   state = { 
-    user: null
+    user: null,
+    socket: ''
   };
+
+  constructor() {
+    super();
+    this.socket = io('http://localhost:3000');
+  }
 
   componentDidMount() {
     let { user } = this.state;
@@ -22,6 +29,8 @@ class App extends Component {
     this.setState({ user });
   }
   
+ 
+
   displayLogin = () => {
     return this.state.user === null ? <LoginForm /> : (<div>
                                                         <Nav />
@@ -42,6 +51,7 @@ class App extends Component {
 
     return (
       <React.Fragment>
+        
         {this.displayLogin() }
       </React.Fragment>
     );
@@ -51,9 +61,3 @@ class App extends Component {
 
 export default App;
 
-/*
-Log in i Sign up
-Prikaz samo login na pocetku
-Nakon logovanja nav bar na multiplayer 
-
-*/

@@ -12,7 +12,12 @@ const games = require('./routers/game');
 const auth = require('./routers/auth');
 const cors = require('cors');
 const express = require('express');
+const socketIo = require('socket.io');
+const http = require('http');
+
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server);
 
 if(!config.get('jwtPrivateKey'))
 {
@@ -40,6 +45,19 @@ app.use('/api/auth', auth);
 
 app.use(error); //ovo nije poziv fje nego ref na tu fju
 
+io.on('connection', (socket) => {
+    console.log(`A user connected: ${socket.id}`);
+  
+    socket.on('chat message', (message) => {
+        io.emit('chat message', message);
+    });
+    
+    socket.on('disconnect', () => {
+        console.log('User disconnected');
+    });
+});
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Listening on port ${port}...`));
+server.listen(port, () => 
+    console.log(`Listening on port ${port}...`)
+);

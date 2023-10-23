@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { getCurrentUser } from "../services/authService";
 import http from "../services/httpService";
+// eslint-disable-next-line
+import { withRouter } from 'react-router-dom';
 
 const apiEndpoint = "http://localhost:3000/api/";
 
@@ -34,7 +36,7 @@ class JoinInGame extends Component {
                 this.state.selectedGame = res.data;
                 console.log(this.state.selectedGame);
                 localStorage.setItem('game', this.state.selectedGame._id);
-                window.location.href = 'http://localhost:3001/multiplayer';
+                this.props.history.push('/multiplayer');
             })
             .catch(ex => {
 

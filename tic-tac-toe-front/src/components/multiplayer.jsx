@@ -11,7 +11,17 @@ class Multiplayer extends Component {
     } 
 
     async componentDidMount() {
-        
+        let { game, board } = this.state;
+        if(localStorage.getItem('game') !== null) {
+            const _id =  localStorage.getItem('game') ;
+            await http.get(apiEndpoint + "mulitplayer", { _id }).then(res => {
+                game = res.data;
+                board = game.board;
+                this.setState({ board });
+            }).catch(ex => {
+
+            });
+        }
     }
 
     handleCreate = async () => {
