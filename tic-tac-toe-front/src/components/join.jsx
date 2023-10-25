@@ -3,6 +3,10 @@ import { getCurrentUser } from "../services/authService";
 import http from "../services/httpService";
 // eslint-disable-next-line
 import { withRouter } from 'react-router-dom';
+//import { io } from 'socket.io-client';
+//import { addSocket, findSocket } from "../socket";
+import { connection, joinServer } from "../socket";
+
 
 const apiEndpoint = "http://localhost:3000/api/";
 
@@ -11,6 +15,24 @@ class JoinInGame extends Component {
         games: null,
         selectedGame: null
     };
+
+    constructor() {
+        super();
+        /* if(localStorage.getItem('socket') === null) {
+            this.state.socket = io('http://localhost:3000');
+            console.log(this.state.socket);
+            localStorage.setItem('socket', this.state.socket.id);
+            this.state.socket.emit('join server', getCurrentUser().username, getCurrentUser()._id);
+            addSocket(this.state.socket);
+        } else {
+            const socketId = localStorage.getItem('socket');
+            this.state.socket = findSocket(socketId);
+        } */
+       
+        connection('http://localhost:3000');
+        joinServer();
+
+    }
 
     componentDidMount() {
         let { games } = this.state;
@@ -34,7 +56,7 @@ class JoinInGame extends Component {
             })
             .then(res => {
                 this.state.selectedGame = res.data;
-                console.log(this.state.selectedGame);
+                //console.log(this.state.selectedGame);
                 localStorage.setItem('game', this.state.selectedGame._id);
                 this.props.history.push('/multiplayer');
             })

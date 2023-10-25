@@ -1,32 +1,30 @@
 import React, { Component } from "react";
 import { Route, Switch } from "react-router-dom";
 import auth from './services/authService'
-//import jwtDecode from "jwt-decode";
-//import ProtectedRoute from "./components/protectedRoute";
 import LoginForm from './components/loginForm';
 import Nav from "./components/nav";
 import SinglePlayer from "./components/singleplayer";
 import Multiplayer from "./components/multiplayer";
 import History from "./components/history";
 import JoinInGame from './components/join';
-//import RegiserForm from "./components/register";
-import io from 'socket.io-client';
+
 
 class App extends Component {
   state = { 
     user: null,
-    socket: ''
+    //socket: ''
   };
 
-  constructor() {
-    super();
-    this.socket = io('http://localhost:3000');
+  sendMessage = () => {
+    this.socket.emit('message', 'Hey it worked');
   }
+
 
   componentDidMount() {
     let { user } = this.state;
     user = auth.getCurrentUser();
     this.setState({ user });
+   
   }
   
  

@@ -10,6 +10,9 @@ const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth.js');
 const { Board } = require('../models/board.js');
 
+const { io, users, games } = require('../template');
+
+
 router.get('/', async (req, res) => {
     const game = await Game.findById(req.body._id)
                             .populate('board')
@@ -17,21 +20,23 @@ router.get('/', async (req, res) => {
     res.send(game);
 });
 
-router.get('/multiplayer', async (req, res) => {
-    const game = await Game.findById(req.body._id)
-                            .populate('board')
-                            .populate('xPlayer')
-                            .populate('oPlayer');
+router.get('/multiplayer/:_id', async (req, res) => {
+    const game = await Game.findById(req.params._id)
+                        .populate('board')
+                        .populate('xPlayer')
+                        .populate('oPlayer');
     res.send(game);
-})
+});
 
 router.get('/allForUser', async (req, res) => {
-    const games = await Game.find({
-        $or: [
-          { xPlayer: req.body.playerId },
-          { oPlayer: req.body.playerId },
-        ],
-      }).populate('xPlayer').populate('oPlayer');
+    let games = [];
+    for(let game in Game.find({}).populate('xPlayer').populate('oPlayer')) {
+        if(game.type === 'singleplayer' && game.xPlayer === req.body.playerId)  {
+            games.append(game);
+        } else if(game.type === 'multiplayer' && (game.xPlayer === req.body.playerId || game.yPlayer === req.body.playerId )) {
+            games.append(game);
+        }
+    }  
     res.send(games);
 });
 
@@ -48,9 +53,21 @@ router.post('/', auth, async (req, res) => {
         _.pick(req.body, ['xPlayer', 'type'])
     )
     
+    
     game.board = board._id;
     let createdGame = await game.save();
-
+    //TODO
+    //Napraviti novu sobu i postaviti id game i uzeti user iz liste users i staviti tu kao xPlayer-a
+    if(game.type === 'multiplayer') {
+        const newGame = {
+            id: game._id,
+            xPlayer: users.find(u => u.userId === req.body.xPlayer),
+            oPlayer: null
+        }
+       // game.id = game._id
+        //game.xPlayer = users.find(u => u.userId === req.body.xPlayer);
+        games.push(newGame);
+    }
 
     res.header().send(await Game.findById(createdGame._id).populate('board'));
 });
@@ -62,8 +79,29 @@ router.put('/join/:id', auth, async (req, res) => {
     //if(!game) return res.status(400).send('Someone already joined in game.');
 
     game.oPlayer = req.body.oPlayer;
-
     game.save();
+
+
+    let joinedGame = await games.find((g) => g.id == req.params.id);
+    const index = games.indexOf(joinedGame);
+    joinedGame.oPlayer = await users.find((u) => u.userId == req.body.oPlayer);
+    /* 
+    for(let i = 0; i < users.length; i++) {
+        console.log(users[i].userId);
+        console.log(game.oPlayer);
+        if(users[i].userId == game.oPlayer) {
+            joinedGame.oPlayer = users[i];
+            users[i] = joinedGame;
+            console.log('Usao u petlju');
+            break; 
+        }
+    } */
+    
+
+    games[index] = joinedGame;
+   // console.log("join in game" + users.find(u => u.userId === req.body.oPlayer));
+
+    console.log(games);
 
     res.header().send(game);
 });
@@ -75,6 +113,7 @@ router.get('/join/:playerId', async (req, res) => {
                 .populate('board');
     res.send(games);
 })
+
 
 module.exports = router;
 

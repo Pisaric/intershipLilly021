@@ -11,7 +11,9 @@ const auth = require('../middleware/auth.js');
 
 
 router.get('/', async (req, res) => {
+    console.log(req.body._id);
     const board = await Board.findById(req.body._id);
+    console.log(board);
     res.send(board);
 });
 
