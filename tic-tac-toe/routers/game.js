@@ -4,6 +4,7 @@ const asyncMiddleware = require('../middleware/async');
 const express = require('express');
 const router = express.Router();
 const { Game } = require('../models/game.js');
+const { User } = require('../models/user.js');
 const mongoose = require('mongoose')
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -21,12 +22,10 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/multiplayer/:_id', async (req, res) => {
-    console.log('usao u gde treba');
     const game = await Game.findById(req.params._id)
                         .populate('board')
                         .populate('xPlayer')
                         .populate('oPlayer');
-    console.log(game);
     res.send(game);
 });
 
@@ -60,16 +59,22 @@ router.post('/', auth, async (req, res) => {
     
     game.board = board._id;
     let createdGame = await game.save();
-    //TODO
-    //Napraviti novu sobu i postaviti id game i uzeti user iz liste users i staviti tu kao xPlayer-a
+
     if(game.type === 'multiplayer') {
         const newGame = {
             id: game._id,
             xPlayer: users.find(u => u.userId === req.body.xPlayer),
             oPlayer: null
         }
-       // game.id = game._id
-        //game.xPlayer = users.find(u => u.userId === req.body.xPlayer);
+
+        game.xPlayer = await User.findById(game.xPlayer);
+
+        for(let i = 0; i < users.length; i++) {
+            if(users[i].userId !== game.xPlayer) {
+                io.to(users[i].id).emit('newgame', game);
+            }
+        }
+
         games.push(newGame);
     }
 

@@ -22,23 +22,28 @@ class JoinInGame extends Component {
 
     }
 
-    componentDidMount() {
+    listenNewGame = () => {
         let { games } = this.state;
-        getSocket().on('new game', (newGames) => {
-            games = newGames;
+        getSocket().on('newgame', (newGame) => {
+            games.push(newGame);
             this.setState({ games });
         })
-        const playerId = getCurrentUser()._id;
-        http.get(apiEndpoint + "games/join/" + playerId)
-            .then(res => {
-                games = res.data;
-                this.setState({ games });
-            })
-            .catch(ex => {
-
-            });
     }
 
+    async componentDidMount() {
+        let { games } = this.state;
+        const playerId = getCurrentUser()._id;
+        await http.get(apiEndpoint + "games/join/" + playerId)
+        .then(res => {
+            games = res.data;
+            this.setState({ games });
+        })
+            .catch(ex => {
+
+        });  
+        this.listenNewGame();
+    }
+    
     handlerJoin = async (game) => {
         const oPlayer = getCurrentUser()._id;
         await http.put(apiEndpoint + "games/join/" + game._id, {oPlayer }, {
