@@ -12,7 +12,15 @@ const games = require('./routers/game');
 const auth = require('./routers/auth');
 const cors = require('cors');
 const express = require('express');
-const app = express();
+//const http = require('http');
+//const { Server } = require('socket.io');
+
+
+//const app = express();
+//const server = http.createServer(app);
+//const io = require('socket.io')(server, {cors: { origin: "*" }});
+const { app, server, io } = require('./template');
+
 
 if(!config.get('jwtPrivateKey'))
 {
@@ -40,6 +48,55 @@ app.use('/api/auth', auth);
 
 app.use(error); //ovo nije poziv fje nego ref na tu fju
 
+/*
+let joinedUsers = [];
+
+io.on('connection', (socket) => {
+    /* socket.on("join server", (username) => {
+        const user = {
+            username,
+            id: socket.id
+        }
+        this.joinedUsers.push(user);
+        io.emit("new user", users);
+    } )
+
+    socket.on('join room', (roomName, cb) => {
+        socket.join(roomName);
+        cb(message[roomName]);
+        //socket.emit("joined", messages[roomName]);
+    });
+
+    socket.on("disconnect", () => {
+        //users = users.filter(u => u.id !== socket.id);
+        io.emit("new user", users);
+    })
+    console.log('A user connected: ' + socket.id);
+    
+    socket.on('disconnect', () => {
+        console.log('user disconnected');
+    }); 
+
+    socket.on('message', (data) => {
+        console.log(data);
+        socket.broadcast.emit('message', data);
+    });
+
+    socket.on('join game', socket => {
+        const user = {
+            username,
+            id: socket.id
+        }
+        users.push(user);
+        io.emit('new user', users);
+    }) 
+
+
+
+}); */
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Listening on port ${port}...`));
+server.listen(port, () => 
+    console.log(`Listening on port ${port}...`)
+);
+

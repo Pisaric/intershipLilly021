@@ -12,10 +12,14 @@ const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth.js');
 const { makeBotMove } = require('../service/bot');
 
+const { io, users, games } = require('../template');
+
 router.get('/', async (req, res) => {
     const move = await Move.findById(req.body._id).populate('gameId');
     res.send(move);
 });
+
+
 
 router.post('/multiPlayer', auth, async (req, res) => {
     const { error } = validate(req.body);
@@ -27,7 +31,7 @@ router.post('/multiPlayer', auth, async (req, res) => {
 
     let createdMove = await move.save();
     let retVal = await drawMove(createdMove);
-
+/* 
     if(!(retVal.isValid)) {
         return res.status(400).send(retVal.message);
     }
@@ -35,8 +39,20 @@ router.post('/multiPlayer', auth, async (req, res) => {
     if(retVal.isValid && retVal.message !== '') {
         return res.status(200).send(retVal.message);
     }
-
-    res.header().send(createdMove);
+ */
+    let game = null;
+    for(let i = 0; i < games.length; i++) {
+        if(games[i].id.equals(move.gameId)) { 
+            game = games[i];
+            break;
+        }
+    }
+    
+    let gameTmp = await Game.findById(move.gameId);
+    let board = await Board.findById(gameTmp.board);
+    io.to(game.xPlayer.id).to(game.oPlayer.id).emit('updatedBoard', board);
+    
+    res.header().send(board);
 });
 
 router.post('/botplay', async (req, res) => {
@@ -55,7 +71,6 @@ router.post('/botplay', async (req, res) => {
   
     
     if(!retVal.isValid) {
-        console.log('ovde');
         return res.status(400).send(retVal.message);
     }
     /*
