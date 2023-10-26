@@ -31,7 +31,7 @@ router.post('/multiPlayer', auth, async (req, res) => {
 
     let createdMove = await move.save();
     let retVal = await drawMove(createdMove);
-
+/* 
     if(!(retVal.isValid)) {
         return res.status(400).send(retVal.message);
     }
@@ -39,7 +39,7 @@ router.post('/multiPlayer', auth, async (req, res) => {
     if(retVal.isValid && retVal.message !== '') {
         return res.status(200).send(retVal.message);
     }
-
+ */
     let game = null;
     for(let i = 0; i < games.length; i++) {
         if(games[i].id.equals(move.gameId)) { 

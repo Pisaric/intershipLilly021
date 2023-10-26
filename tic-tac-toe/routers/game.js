@@ -21,23 +21,27 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/multiplayer/:_id', async (req, res) => {
+    console.log('usao u gde treba');
     const game = await Game.findById(req.params._id)
                         .populate('board')
                         .populate('xPlayer')
                         .populate('oPlayer');
+    console.log(game);
     res.send(game);
 });
 
 router.get('/allForUser', async (req, res) => {
-    let games = [];
-    for(let game in Game.find({}).populate('xPlayer').populate('oPlayer')) {
-        if(game.type === 'singleplayer' && game.xPlayer === req.body.playerId)  {
-            games.append(game);
-        } else if(game.type === 'multiplayer' && (game.xPlayer === req.body.playerId || game.yPlayer === req.body.playerId )) {
-            games.append(game);
+    let gamesHistory = [];
+    const allGames = await Game.find().populate('xPlayer').populate('oPlayer')
+    for(let i = 0; i < allGames.length; i++) {
+        if(allGames[i].type === 'singleplayer' && allGames[i].xPlayer === req.body.playerId)  {
+            gamesHistory.push(allGames[i]);
+        } else if(allGames[i].type === 'multiplayer' && (allGames[i].xPlayer === req.body.playerId || allGames[i].yPlayer === req.body.playerId )) {
+            gamesHistory.push(allGames[i]);
         }
-    }  
-    res.send(games);
+    }
+      
+    res.send(gamesHistory);
 });
 
 router.post('/', auth, async (req, res) => {
@@ -69,11 +73,12 @@ router.post('/', auth, async (req, res) => {
         games.push(newGame);
     }
 
+    
     res.header().send(await Game.findById(createdGame._id).populate('board'));
 });
 
 router.put('/join/:id', auth, async (req, res) => {
-    let game = await Game.findById(req.params.id);
+    let game = await Game.findById(req.params.id).populate('xPlayer').populate('board');
     if(!game) return res.status(404).send('The game with the given Id was not found');
    // if(!game) return res.status(400).send('The game with the given ID is not multiplayer.');
     //if(!game) return res.status(400).send('Someone already joined in game.');
@@ -85,23 +90,18 @@ router.put('/join/:id', auth, async (req, res) => {
     let joinedGame = await games.find((g) => g.id == req.params.id);
     const index = games.indexOf(joinedGame);
     joinedGame.oPlayer = await users.find((u) => u.userId == req.body.oPlayer);
-    /* 
-    for(let i = 0; i < users.length; i++) {
-        console.log(users[i].userId);
-        console.log(game.oPlayer);
-        if(users[i].userId == game.oPlayer) {
-            joinedGame.oPlayer = users[i];
-            users[i] = joinedGame;
-            console.log('Usao u petlju');
-            break; 
-        }
-    } */
-    
+
 
     games[index] = joinedGame;
-   // console.log("join in game" + users.find(u => u.userId === req.body.oPlayer));
 
-    console.log(games);
+    let gameTmp = null;
+    for(let i = 0; i < games.length; i++) {
+        if(games[i].id.equals(game._id)) { 
+            gameTmp = games[i];
+            break;
+        }
+    }
+    io.to(gameTmp.xPlayer.id).to(gameTmp.oPlayer.id).emit('joinedGame', game);
 
     res.header().send(game);
 });

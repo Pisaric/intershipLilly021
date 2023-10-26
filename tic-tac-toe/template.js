@@ -20,10 +20,9 @@ io.on('connect', (socket) => {
             id: socket.id
         }
         users.push(user);
-        console.log(users);
+        //console.log(users);
         //io.emit("new user", users);
     });
-
 
 
 });

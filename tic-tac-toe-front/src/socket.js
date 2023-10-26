@@ -18,23 +18,3 @@ export function joinServer() {
 export function getSocket() {
   return socket;
 }
-
-/* let sockets = []
-
-function addSocket(socket) {
-  sockets.push(socket);
-  console.log(sockets);
-}
-
-function findSocket(id) {
-  for(let i = 0;  i < sockets.length; i++) {
-    if(sockets[i].id === id) { 
-      return sockets[i];
-    }
-  }
-}
-
-module.exports.addSocket = addSocket;
-module.exports.findSocket = findSocket; */
-
-

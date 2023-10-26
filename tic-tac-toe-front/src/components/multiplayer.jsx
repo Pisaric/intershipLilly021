@@ -1,9 +1,7 @@
 import React, { Component } from "react";
 import { getCurrentUser } from "../services/authService";
 import http from "../services/httpService";
-//import { io } from 'socket.io-client';
 import { connection, joinServer, getSocket } from "../socket";
-//import { connection, joinServer } from "../socket";
 
 const apiEndpoint = "http://localhost:3000/api/";
 
@@ -17,56 +15,48 @@ class Multiplayer extends Component {
 
     constructor() {
         super();
-        /*if(localStorage.getItem('socket') === null) {
-             console.log('u ifu');
-            this.state.socket = io('http://localhost:3000');
-            console.log(this.state.socket);
-            console.log(this.state.socket.socket.id);
-            console.log('kraj ifa');
-            localStorage.setItem('socket', this.state.socket.id); 
-        } else {
-            const socketId = localStorage.getItem('socket');
-            this.state.socket = findSocket(socketId);
-        }*/
+     
         connection('http://localhost:3000');
         joinServer();
+
     }
 
-    listenBoard = () => {
-        let { board } = this.state;
-        getSocket().on('updatedBoard', (newBoard) => {
-            board = newBoard;
-            this.setState({ board });
+    listenBoard =  () => {
+        let { game } = this.state;
+        getSocket().on('updatedBoard', async (newBoard) => {
+            await http.get(apiEndpoint + 'games/multiplayer/' + localStorage.getItem('game')).then(res => {
+                game = res.data;
+            })
+            game.board = newBoard;
+            this.setState({ game });
+        })
+    }
+
+    listenJoin = () => {
+        let { game } = this.state;
+        getSocket().on('joinedGame', (newGame) => {
+            game = newGame;
+            this.setState({ game });
         })
     }
    
     async componentDidMount() {
-        this.listenBoard();
         if(localStorage.getItem('game') !== null) {
-            let { game, board } = this.state;
+            let { game } = this.state;
             let _id = localStorage.getItem('game');
             await http.get(apiEndpoint + "games/multiplayer/" + _id).then(res => {
                 game = res.data;
-                board = game.board;
-                this.setState({ game, board });
+                this.setState({ game });
             }) 
-        }    
+        }  
+        
+        this.listenJoin();
+        this.listenBoard();
     }
 
     handleCreate = async () => {
-        /*
+     
         let { game } = this.state;
-        const _id = getCurrentUser()._id;
-        http.get(apiEndpoint + 'games/multiplayer', { params: localStorage.getItem('game') })
-            .then(res => {
-                game = res.body;
-                this.setState({ game });
-            })
-            .cathc(ex => {
-
-            });
-        */
-        let { game, board } = this.state;
         const xPlayer = getCurrentUser()._id;
         const type = "multiplayer"
         await http.post(apiEndpoint + "games", { xPlayer, type}, {
@@ -76,87 +66,104 @@ class Multiplayer extends Component {
         }).then(response =>  {
             game = response.data;
             localStorage.setItem('game', game._id);
-            board = response.data.board;
-            this.setState({ board, game });
-        });        
+            this.setState({ game });
+        });       
+        console.log(game); 
     }
 
-    displayResult = () => {
-        let { board } = this.state;
-        if(board.isDraw) {
-            return <h2>DRAW</h2>;
-        } else if(board.winner === 'X') {
-            return <h2>X is winner</h2>;
-        } else if(board.winner === 'O'){
-            return <h2>O is winner</h2>
+    isValidMove = (game) => {
+        if(game.board.currentPlayer === 'X' && game.xPlayer._id !== getCurrentUser()._id) {
+            return false;
         }
+        else if(game.board.currentPlayer === 'O' && game.oPlayer._id !== getCurrentUser()._id) {
+            return false;
+        }
+        return true;
     }
-
 
     handleClick = async (row, col) => {
-        let { game, board } = this.state;
-        if(game.oPlayer === null) {
-            await http.get('games/multiplayer/' + game._id).then(res => {
-                game = res.data;
-            });
-        }
-        console.log(game);
-        if(board.currentUser === 'X' && game.xPlayer._id !== getCurrentUser()._id) {
+        let { game } = this.state;
+
+        if(!this.isValidMove(game)) {
             alert('This is not your turn');
             return;
         }
-        else if(board.currentUser === 'O' && game.oPlayer._id !== getCurrentUser()._id) {
-            alert('This is not your turn');
+
+        if(game.board.winner !== null || game.board.isDraw) {
+            alert('Game is over');
             return;
         }
-        if(board.winner !== null || board.isDraw) return;
+        if(game.board === null || game.board.board[row][col] !== null) {
+            alert('Invalid move');
+            return;
+        }
+
         const gameId = localStorage.getItem('game')
-        if(board === null || board.board[row][col] !== null) return;
         await http.post(apiEndpoint + "moves/multiPlayer", {gameId, row, col}, {
             headers: {
                 'x-auth-token': localStorage.getItem('token')
             }
         }).then(res => {
-            board = res.data;
-            this.setState({ board });
+            game.board = res.data;
+            this.setState({ game });
         }).catch(ex => {
             console.error(ex);
         });
-        if(board.winner === null && !board.isDraw) {
-            //await this.botMove();
-        }
-        this.displayResult();
+
     }
 
     
     displayBoard = () => {
-        let {game, board} = this.state;
-        if(game === null) return <button onClick={this.handleCreate.bind(this)}>New game</button>;
+        let { game } = this.state;
+        if(game === null) return null;
         return (
             <React.Fragment>
                 <div className="row row-cols-3">
-                    <div className="col border cell text-center" onClick={this.handleClick.bind(this, 0, 0)}> { board.board[0][0] === null ? '' : board.board[0][0] } </div>
-                    <div className="col border cell text-center" onClick={this.handleClick.bind(this, 0, 1)}> { board.board[0][1] === null ? '' : board.board[0][1] } </div>
-                    <div className="col border cell text-center" onClick={this.handleClick.bind(this, 0, 2)}> { board.board[0][2] === null ? '' : board.board[0][2] } </div>
+                    <div className="col border cell text-center" onClick={this.handleClick.bind(this, 0, 0)}> { game.board.board[0][0] === null ? '' : game.board.board[0][0] } </div>
+                    <div className="col border cell text-center" onClick={this.handleClick.bind(this, 0, 1)}> { game.board.board[0][1] === null ? '' : game.board.board[0][1] } </div>
+                    <div className="col border cell text-center" onClick={this.handleClick.bind(this, 0, 2)}> { game.board.board[0][2] === null ? '' : game.board.board[0][2] } </div>
                 </div>
                 <div className="row row-cols-3">
-                    <div className="col border cell text-center" onClick={this.handleClick.bind(this, 1, 0)}> { board.board[1][0] === null ? '' : board.board[1][0] } </div>
-                    <div className="col border cell text-center" onClick={this.handleClick.bind(this, 1, 1)}> { board.board[1][1] === null ? '' : board.board[1][1] } </div>
-                    <div className="col border cell text-center" onClick={this.handleClick.bind(this, 1, 2)}> { board.board[1][2] === null ? '' : board.board[1][2] } </div>
+                    <div className="col border cell text-center" onClick={this.handleClick.bind(this, 1, 0)}> { game.board.board[1][0] === null ? '' : game.board.board[1][0] } </div>
+                    <div className="col border cell text-center" onClick={this.handleClick.bind(this, 1, 1)}> { game.board.board[1][1] === null ? '' : game.board.board[1][1] } </div>
+                    <div className="col border cell text-center" onClick={this.handleClick.bind(this, 1, 2)}> { game.board.board[1][2] === null ? '' : game.board.board[1][2] } </div>
                 </div>
                 <div className="row row-cols-3">
-                    <div className="col border cell text-center" onClick={this.handleClick.bind(this, 2, 0)}> { board.board[2][0] === null ? '' : board.board[2][0] } </div>
-                    <div className="col border cell text-center" onClick={this.handleClick.bind(this, 2, 1)}> { board.board[2][1] === null ? '' : board.board[2][1] } </div>
-                    <div className="col border cell text-center" onClick={this.handleClick.bind(this, 2, 2)}> { board.board[2][2] === null ? '' : board.board[2][2] } </div>
+                    <div className="col border cell text-center" onClick={this.handleClick.bind(this, 2, 0)}> { game.board.board[2][0] === null ? '' : game.board.board[2][0] } </div>
+                    <div className="col border cell text-center" onClick={this.handleClick.bind(this, 2, 1)}> { game.board.board[2][1] === null ? '' : game.board.board[2][1] } </div>
+                    <div className="col border cell text-center" onClick={this.handleClick.bind(this, 2, 2)}> { game.board.board[2][2] === null ? '' : game.board.board[2][2] } </div>
                 </div>
             </React.Fragment> 
         );
+    }
+
+    displayButton = () => {
+        const { game } = this.state;
+        if(game === null) {
+            return <button onClick={this.handleCreate.bind(this)}>New game</button>;
+        } else if(game.board.isDraw || game.board.winner !== null) {
+            return <button onClick={this.handleCreate.bind(this)}>New game</button>;
+        }
+    }
+
+    displayResult = () => {
+        const { game } = this.state;
+        if(game === null) return null;
+        if(game.board.isDraw) {
+            return <h2>DRAW</h2>
+        } else if(game.board.winner === 'X') {
+            return <h2> Winer is X </h2>
+        } else if(game.board.winner === 'O') {
+            return <h2>Winer is O</h2>
+        }
     }
 
     render() { 
         return (
             <React.Fragment>
                 <h1>Multi player</h1>
+                { this.displayButton() }
+                { this.displayResult() }
                 { this.displayBoard() }
             </React.Fragment>
         );
