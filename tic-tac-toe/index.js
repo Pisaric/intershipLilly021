@@ -12,7 +12,8 @@ const games = require('./routers/game');
 const auth = require('./routers/auth');
 const cors = require('cors');
 const express = require('express');
-const app = express();
+const { app, server, io } = require('./socket');
+
 
 if(!config.get('jwtPrivateKey'))
 {
@@ -42,4 +43,7 @@ app.use(error); //ovo nije poziv fje nego ref na tu fju
 
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Listening on port ${port}...`));
+server.listen(port, () => 
+    console.log(`Listening on port ${port}...`)
+);
+

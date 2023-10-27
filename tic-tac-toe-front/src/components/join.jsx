@@ -1,6 +1,10 @@
 import React, { Component } from "react";
 import { getCurrentUser } from "../services/authService";
 import http from "../services/httpService";
+// eslint-disable-next-line
+import { withRouter } from 'react-router-dom';
+import { connection, joinServer, getSocket } from "../socket";
+
 
 const apiEndpoint = "http://localhost:3000/api/";
 
@@ -10,19 +14,35 @@ class JoinInGame extends Component {
         selectedGame: null
     };
 
-    componentDidMount() {
-        let { games } = this.state;
-        const playerId = getCurrentUser()._id;
-        http.get(apiEndpoint + "games/join/" + playerId)
-            .then(res => {
-                games = res.data;
-                this.setState({ games });
-            })
-            .catch(ex => {
+    constructor() {
+        super();
+        connection('http://localhost:3000');
+        joinServer();
 
-            });
     }
 
+    listenNewGame = () => {
+        let { games } = this.state;
+        getSocket().on('newgame', (newGame) => {
+            games.push(newGame);
+            this.setState({ games });
+        })
+    }
+
+    async componentDidMount() {
+        let { games } = this.state;
+        const playerId = getCurrentUser()._id;
+        await http.get(apiEndpoint + "games/join/" + playerId)
+        .then(res => {
+            games = res.data;
+            this.setState({ games });
+        })
+            .catch(ex => {
+
+        });  
+        this.listenNewGame();
+    }
+    
     handlerJoin = async (game) => {
         const oPlayer = getCurrentUser()._id;
         await http.put(apiEndpoint + "games/join/" + game._id, {oPlayer }, {
@@ -32,9 +52,8 @@ class JoinInGame extends Component {
             })
             .then(res => {
                 this.state.selectedGame = res.data;
-                console.log(this.state.selectedGame);
                 localStorage.setItem('game', this.state.selectedGame._id);
-                window.location.href = 'http://localhost:3001/multiplayer';
+                this.props.history.push('/multiplayer');
             })
             .catch(ex => {
 

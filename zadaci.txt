@@ -1,0 +1,6 @@
+Zadaci za sutra:
+1. Obrisati na serveru iz gamesa kad se pratija zavrsi										<<< URADJENO
+2. Obrisati iz localstorage game												<<< URADJENO
+3. Prilikom rehresa naci uz pomoc game u local storage naci taj game i na playeru koji je rfreshovao promeni socket id		<<< URADJENO
+4. Isto to promeniti i users 													<<< URADJENO
+5. Nakon disconecta izbaciiti usera												<<< NIJE URADJENO IMAM PROBLEM

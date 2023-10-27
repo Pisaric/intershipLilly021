@@ -15,8 +15,8 @@ router.get('/', auth ,async (req, res) => {
     res.send(user);
 });
 
-router.post('', async (req, res) => {
-    const { error } = validate(req.body);
+router.post('/', async (req, res) => {
+    const { error } = validate(req.body.data);
     if(error) return res.status(400).send(error.details[0].message);
   
     let user = User.findOne({ email: req.body.email });
@@ -26,7 +26,7 @@ router.post('', async (req, res) => {
     if(!user) return res.status(400).send('User already registred.');
 
     user = new User(
-        _.pick(req.body, ['name', 'email', 'password', 'username', 'surname'])
+        _.pick(req.body.data, ['name', 'email', 'password', 'username', 'surname'])
     )
 
   //  const salt = await bcrypt.genSalt(10);
@@ -35,7 +35,7 @@ router.post('', async (req, res) => {
     let = await user.save();
 
     const token = jwt.sign({ _id: user._id}, config.get('jwtPrivateKey'));
-    res.header('x-auth-token', token).send( _.pick(user, ['_id','name', 'email']));
+    res.header('x-auth-token', token).header("access-control-expose-headers", "x-auth-token").send( _.pick(user, ['_id','name', 'email']));
 });
 
 router.put('/:id', (req, res) => {
@@ -62,9 +62,6 @@ router.put('/:id', (req, res) => {
     course.name = req.body.name;
     res.send(course);
 })
-
-
-
 
 router.delete('/:id', (req, res) => {
     //look up entity

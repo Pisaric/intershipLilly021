@@ -1,27 +1,34 @@
 import React, { Component } from "react";
 import { Route, Switch } from "react-router-dom";
 import auth from './services/authService'
-//import jwtDecode from "jwt-decode";
-//import ProtectedRoute from "./components/protectedRoute";
 import LoginForm from './components/loginForm';
 import Nav from "./components/nav";
 import SinglePlayer from "./components/singleplayer";
 import Multiplayer from "./components/multiplayer";
 import History from "./components/history";
 import JoinInGame from './components/join';
-//import RegiserForm from "./components/register";
+
 
 class App extends Component {
   state = { 
-    user: null
+    user: null,
+    //socket: ''
   };
+
+  sendMessage = () => {
+    this.socket.emit('message', 'Hey it worked');
+  }
+
 
   componentDidMount() {
     let { user } = this.state;
     user = auth.getCurrentUser();
     this.setState({ user });
+   
   }
   
+ 
+
   displayLogin = () => {
     return this.state.user === null ? <LoginForm /> : (<div>
                                                         <Nav />
@@ -42,6 +49,7 @@ class App extends Component {
 
     return (
       <React.Fragment>
+        
         {this.displayLogin() }
       </React.Fragment>
     );
@@ -51,9 +59,3 @@ class App extends Component {
 
 export default App;
 
-/*
-Log in i Sign up
-Prikaz samo login na pocetku
-Nakon logovanja nav bar na multiplayer 
-
-*/
