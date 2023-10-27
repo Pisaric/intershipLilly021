@@ -12,7 +12,7 @@ const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth.js');
 const { makeBotMove } = require('../service/bot');
 
-const { io, users, games } = require('../template');
+const { io, users, games } = require('../socket');
 
 router.get('/', async (req, res) => {
     const move = await Move.findById(req.body._id).populate('gameId');
@@ -48,12 +48,25 @@ router.post('/multiPlayer', auth, async (req, res) => {
         }
     }
     
-    let gameTmp = await Game.findById(move.gameId);
-    let board = await Board.findById(gameTmp.board);
-    io.to(game.xPlayer.id).to(game.oPlayer.id).emit('updatedBoard', board);
+    let gameTmp = await Game.findById(move.gameId).populate('board');
+    //let board = await Board.findById(gameTmp.board);
+    io.to(game.xPlayer.id).to(game.oPlayer.id).emit('updatedBoard', gameTmp.board);
     
-    res.header().send(board);
+    if(isGameOver(gameTmp.board)) {
+        for(let i = 0; i < games.length; i++) {
+            if(gameTmp._id.equals(games[i].id)) {
+                console.log('usao u if');
+                delete games[i];
+            }
+        } 
+    }
+
+    res.header().send(gameTmp.board);
 });
+
+isGameOver = (board) => {
+    return board.isDraw || board.winner !== null;
+}
 
 router.post('/botplay', async (req, res) => {
     let game = await Game.findById(req.body.gameId);

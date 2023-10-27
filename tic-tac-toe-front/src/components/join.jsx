@@ -16,7 +16,6 @@ class JoinInGame extends Component {
 
     constructor() {
         super();
-    
         connection('http://localhost:3000');
         joinServer();
 

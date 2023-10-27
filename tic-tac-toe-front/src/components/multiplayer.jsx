@@ -11,14 +11,11 @@ class Multiplayer extends Component {
         board: null,
     } 
 
-
-
     constructor() {
         super();
-     
         connection('http://localhost:3000');
         joinServer();
-
+        
     }
 
     listenBoard =  () => {
@@ -142,6 +139,7 @@ class Multiplayer extends Component {
         if(game === null) {
             return <button onClick={this.handleCreate.bind(this)}>New game</button>;
         } else if(game.board.isDraw || game.board.winner !== null) {
+            localStorage.removeItem('game');
             return <button onClick={this.handleCreate.bind(this)}>New game</button>;
         }
     }

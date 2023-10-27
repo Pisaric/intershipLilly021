@@ -11,7 +11,7 @@ const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth.js');
 const { Board } = require('../models/board.js');
 
-const { io, users, games } = require('../template');
+const { io, users, games } = require('../socket');
 
 
 router.get('/', async (req, res) => {

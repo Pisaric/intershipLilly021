@@ -6,8 +6,17 @@ let joined = false;
 
 export function connection(url) {
   if(socket !== null) return;
-  socket = io(url);
+  socket = io.connect(url);
+  console.log(socket.id); 
+  socket.on('connect', () => {
+      console.log(socket.id); 
+      localStorage.setItem('socket', socket.id);
+  });
 } 
+
+function isExisted() {
+
+}
 
 export function joinServer() {
   if(joined) return;
@@ -17,4 +26,10 @@ export function joinServer() {
 
 export function getSocket() {
   return socket;
+}
+
+export function recconect(id) {
+  socket = io('http://localhost:3000');
+  socket.id = id;
+  console.log(socket);
 }
