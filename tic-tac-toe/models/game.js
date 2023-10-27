@@ -10,7 +10,6 @@ const gameSchema = new mongoose.Schema({
     },
     xPlayer: {
         type: mongoose.Schema.Types.ObjectId,
-    //    required: true,
         ref: 'Users'
     },
     oPlayer: {

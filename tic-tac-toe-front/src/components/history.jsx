@@ -13,8 +13,7 @@ class History extends Component {
     async componentDidMount() {
         let { games } = this.state;
         const playerId = getCurrentUser()._id;
-        await http.get(apiEndpoint + "games/allForUser", {
-            params: { playerId }})
+        await http.get(apiEndpoint + "games/allForUser/" + playerId)
             .then(res => {
                 games = res.data;
                 this.setState({ games });

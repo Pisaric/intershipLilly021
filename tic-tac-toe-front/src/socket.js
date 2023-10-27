@@ -14,9 +14,6 @@ export function connection(url) {
   });
 } 
 
-function isExisted() {
-
-}
 
 export function joinServer() {
   if(joined) return;

@@ -31,8 +31,8 @@ class loginForm extends Component {
                     .label('Password'),
     });
 
-    handlerSumbit = async () => {
-        //e.preventDefault();
+    handlerSumbit = async (e) => {
+        e.preventDefault();
 
         //Pozovi server
        // const errors = this.validate();
@@ -46,7 +46,7 @@ class loginForm extends Component {
            // this.setState({ data });
            //props.history.push("/singleplayer");
         } catch(ex) {
-
+            alert('Invalid email or password.');
         }
     }
     

@@ -50,10 +50,16 @@ io.on('connect', function(socket) {
             id: socket.id
         }
         users.push(user);
-        //console.log(users);
+        console.log(users);
     });
 
-
+    socket.on("log out", (userId) => {
+        for(let i = 0; i < users.length; i++) {
+            if(users[i].userId === userId) {
+                delete users[i];
+            }
+        }
+    })
 
 });
 
