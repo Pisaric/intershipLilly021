@@ -63,9 +63,6 @@ router.put('/:id', (req, res) => {
     res.send(course);
 })
 
-
-
-
 router.delete('/:id', (req, res) => {
     //look up entity
     // Not existing, return 404
