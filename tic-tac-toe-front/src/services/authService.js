@@ -1,5 +1,6 @@
 import jwtDecode from "jwt-decode";
 import http from "./httpService";
+import { getSocket } from "../socket";
 
 const apiEndpoint = "http://localhost:3000/api/auth";
 const tokenKey = "token";
@@ -14,6 +15,8 @@ export function loginWihtJWT(jwt) {
 }
 
 export function logout() {
+   // getSocket().emit("log out", getCurrentUser()._id);
+   // localStorage.removeItem('socket');
     localStorage.removeItem(tokenKey);
     window.location.reload(false);
 }

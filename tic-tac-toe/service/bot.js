@@ -1,24 +1,8 @@
-const config = require('config');
-const _ = require('lodash');
-const asyncMiddleware = require('../middleware/async')
-const express = require('express');
-const router = express.Router();
-const { Move } = require('../models/move.js');
-const { Board, validateBoard, isFinished, checkWinner, isMoveValid, nextPlayer } = require('../models/board.js');
-const { Game } = require('../models/game.js');
+const {  isFinished, checkWinner } = require('../models/board.js');
 
   
   
 function minimax(board, depth, maximizingPlayer) {
-    /* if (isFinished(board)) {
-        if (checkWinner(board) === 'O') {
-            return 10;
-        } else if (checkWinner(board) === 'X') {
-            return -10;
-        } else {
-            return -1;
-        }
-    } */
     const winner = checkWinner(board);
     if(winner === 'X') {
         return -10;

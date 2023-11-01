@@ -1,13 +1,8 @@
-const config = require('config');
-const _ = require('lodash');
-const asyncMiddleware = require('../middleware/async');
 const express = require('express');
 const router = express.Router();
+const _ = require('lodash');
 const { Game } = require('../models/game.js');
 const { User } = require('../models/user.js');
-const mongoose = require('mongoose')
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth.js');
 const { Board } = require('../models/board.js');
 
@@ -29,23 +24,37 @@ router.get('/multiplayer/:_id', async (req, res) => {
     res.send(game);
 });
 
-router.get('/allForUser', async (req, res) => {
+router.get('/allForUser/:playerId', async (req, res) => {
     let gamesHistory = [];
-    const allGames = await Game.find().populate('xPlayer').populate('oPlayer')
+    console.log('prosledjen');
+    console.log(req.params.playerId);
+    const allGames = await Game.find().populate('xPlayer').populate('oPlayer');
     for(let i = 0; i < allGames.length; i++) {
-        if(allGames[i].type === 'singleplayer' && allGames[i].xPlayer === req.body.playerId)  {
+        console.log(allGames[i]);
+        if(allGames[i].type === 'multiplayer' && (allGames[i].xPlayer === null || allGames[i].yPlayer === null )) continue;
+        if(allGames[i].type === 'singleplayer' && allGames[i].xPlayer._id == req.params.playerId)  {
             gamesHistory.push(allGames[i]);
-        } else if(allGames[i].type === 'multiplayer' && (allGames[i].xPlayer === req.body.playerId || allGames[i].yPlayer === req.body.playerId )) {
+        } else if(allGames[i].type === 'multiplayer' && (allGames[i].xPlayer._id == req.params.playerId || allGames[i].oPlayer._id == req.params.playerId )) {
             gamesHistory.push(allGames[i]);
         }
     }
-      
     res.send(gamesHistory);
 });
+
+async function deleteGames(xPlayer) {
+    let allGames = await Game.find({ type: 'multiplayer' }).populate('xPlayer').populate('oPlayer');
+    for(let i = 0; i < allGames.length; i++) {
+        if(allGames[i].xPlayer._id == xPlayer && allGames[i].oPlayer === null) {
+            await allGames[i].deleteOne();
+        }
+    }
+    
+}
 
 router.post('/', auth, async (req, res) => {
     //const { error } = validate(req.body);
     //if(error) return res.status(400).send(error.details[0].message);
+    //deleteGames(req.body.xPlayer);
 
     let board = new Board(
         _.pick(req.body, ['xPlayer'])
@@ -112,11 +121,11 @@ router.put('/join/:id', auth, async (req, res) => {
 });
 
 router.get('/join/:playerId', async (req, res) => {
-    const games = await Game
+    const allGames = await Game
                 .find({ type: 'multiplayer', xPlayer: { $ne: req.params.playerId }, oPlayer: null })
                 .populate('xPlayer')
                 .populate('board');
-    res.send(games);
+    res.send(allGames);
 })
 
 

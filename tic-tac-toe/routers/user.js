@@ -1,6 +1,5 @@
 const config = require('config');
 const _ = require('lodash');
-const asyncMiddleware = require('../middleware/async')
 const express = require('express');
 const router = express.Router();
 const { User, validate } = require('../models/user.js');
@@ -9,7 +8,6 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth.js');
 
-//fali auth
 router.get('/', auth ,async (req, res) => {
     const user = await User.findById(req.body._id).select('-password');
     res.send(user);

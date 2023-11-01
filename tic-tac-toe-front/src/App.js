@@ -24,7 +24,6 @@ class App extends Component {
     let { user } = this.state;
     user = auth.getCurrentUser();
     this.setState({ user });
-   
   }
   
  

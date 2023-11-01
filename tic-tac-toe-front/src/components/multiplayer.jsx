@@ -158,12 +158,12 @@ class Multiplayer extends Component {
 
     render() { 
         return (
-            <React.Fragment>
+            <div  className="container text-center">
                 <h1>Multi player</h1>
                 { this.displayButton() }
                 { this.displayResult() }
                 { this.displayBoard() }
-            </React.Fragment>
+            </div>
         );
     }
 }
