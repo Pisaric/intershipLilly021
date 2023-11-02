@@ -1,8 +1,6 @@
 import _ from 'lodash';
 import express, { Request, Response } from 'express';
 import { User, validateUser as validate } from '../models/user.js';
-import mongoose from 'mongoose';
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import auth from '../middleware/auth.js';
 
@@ -26,9 +24,6 @@ router.post('/', async (req: Request, res: Response) => {
     user = new User(
         _.pick(req.body.data, ['name', 'email', 'password', 'username', 'surname'])
     );
-
-    // const salt = await bcrypt.genSalt(10);
-    // user.password = await bcrypt.hash(user.password, salt);
 
     await user.save();
 

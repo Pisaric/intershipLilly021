@@ -21,7 +21,6 @@ const gameSchema = new Schema<IGame>({
   xPlayer: {
     type: Schema.Types.ObjectId,  
     ref: 'Users',
-    // required: true,
   },
   oPlayer: {
     type: Schema.Types.ObjectId, 

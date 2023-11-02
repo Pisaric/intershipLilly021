@@ -76,14 +76,10 @@ class Multiplayer extends Component<{}, GameState> {
 			this.setState({ game });
 			window.location.reload();  
 		});
-		//joinServer(); 					//ovo sam sada dodao
-		//connection('http://localhost:3000');
-    	//joinServer();
 	}
 
 	isValidMove = (game: IGame) : boolean => {
 		if(game === null) return false;
-		console.log(game);
 		if(typeof (game.board) === 'string') return false;
 		if(typeof (game.xPlayer) === 'string') return false;
 		if(typeof (game.oPlayer) === 'string') return false;
@@ -114,7 +110,6 @@ class Multiplayer extends Component<{}, GameState> {
 		}
 
 		const gameId = localStorage.getItem('game');
-		// const socket = localStorage.getItem('socket');
 		await http.post(apiEndpoint + "moves/multiPlayer", { gameId, row, col }, {
 		headers: {
 			'x-auth-token': localStorage.getItem('token')

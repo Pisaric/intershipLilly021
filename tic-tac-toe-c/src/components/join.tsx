@@ -76,7 +76,7 @@ class JoinInGame extends Component<RouteComponentProps, GameState> {
 			this.state.selectedGame = res.data;
 			if(this.state.selectedGame === null) return;
 			localStorage.setItem('game', this.state.selectedGame._id);
-			this.props.history.push('/multiplayer');					//zbog ovoga se desi promena socketa
+			this.props.history.push('/multiplayer');					
 		})
 		.catch(ex => {
 			console.error(ex);

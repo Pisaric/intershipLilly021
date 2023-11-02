@@ -66,7 +66,6 @@ io.on('connection', function (socket) {
   socket.on("log out", (userId: string) => {
     for(let i = 0; i < users.length; i++) {
         if(users[i].userId === userId) {
-            console.log('Uspesan logout!');
             delete users[i];
         }
     }

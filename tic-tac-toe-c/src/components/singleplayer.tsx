@@ -86,10 +86,8 @@ class SinglePlayer extends Component<{}, SinglePlayerState> {
     await http
       .post(apiEndpoint + "moves/botplay", { gameId })
       .then((res) => {
-        console.log('uradio');
         board = res.data;
         this.setState({ board });
-        console.log('prikazao');
       })
       .catch((ex) => {
         console.log(ex);

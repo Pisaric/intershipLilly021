@@ -55,8 +55,6 @@ async function deleteOthers(xPlayer: string) {
 }
 
 router.post('/', auth, async (req, res) => {
-    // const { error } = validate(req.body);
-    // if(error) return res.status(400).send(error.details[0].message);
     await deleteOthers(req.body.xPlayer);
 
     let board = new Board(
@@ -87,7 +85,6 @@ router.post('/', auth, async (req, res) => {
         }
 
         games.push(newGame);
-        console.log(games);
     }
 
     game.board = board;

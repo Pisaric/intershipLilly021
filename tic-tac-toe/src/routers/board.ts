@@ -35,7 +35,7 @@ router.put('/:id', async (req: Request, res: Response) => {
     }
 
     board.set(req.body);
-    const updatedGame = await board.save();
+    await board.save();
 
     res.send(_.pick(board, ['_id', 'board', 'currentPlayer', 'winner', 'isDraw']));
   } catch (error) {
@@ -43,20 +43,5 @@ router.put('/:id', async (req: Request, res: Response) => {
   }
 });
 
-router.delete('/:id', async (req: Request, res: Response) => {
-  try {
-    const board = await Board.findById(req.params.id);
-    if (!board) return res.status(404).send('The board with the given ID was not found');
-
-    // Delete
-    board.isDeleted = true;
-    const updatedGame = await board.save();
-
-    // Return the same board
-    res.send(updatedGame);
-  } catch (error) {
-    res.status(500).send('An error occurred while deleting the board');
-  }
-});
 
 export default router;
