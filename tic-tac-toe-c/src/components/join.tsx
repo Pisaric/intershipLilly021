@@ -46,15 +46,22 @@ class JoinInGame extends Component<RouteComponentProps, GameState> {
 			.catch((ex) => {
 				console.error(ex);
 			});
-		this.listenNewGame();
+		await this.listenNewGame();
 	}
 
-	listenNewGame = () => {
+	listenNewGame = async () => {
 		let { games } = this.state;
-		getSocket()?.on('newgame', (newGame: IGame) => {
+		getSocket()?.on('newgame', async (newGame: IGame) => {
 			if(games === null || newGame === null) return;
-			games.push(newGame);
-			this.setState({ games });
+			const playerId = getCurrentUser()?._id;
+			await http.get(apiEndpoint + "games/join/" + playerId)
+			.then((res) => {
+				games = res.data;
+				this.setState({ games });
+			})
+			.catch((ex) => {
+				console.error(ex);
+			});
 		});
 	}
 

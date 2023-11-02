@@ -55,7 +55,10 @@ class LoginForm extends Component {
         const { data } = this.state;
 
         try {
-            await http.post(apiEndpoint + 'users', { data });
+            await http.post(apiEndpoint + 'users', { data })
+                .catch(ex => {
+                    alert('User already registered.');
+                });
             await login(data.email, data.password);
             window.location.reload();
         } catch (ex) {

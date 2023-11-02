@@ -21,22 +21,35 @@ router.get('/multiplayer/:_id', async (req, res) => {
 });
 router.get('/allForUser/:playerId', async (req, res) => {
     let gamesHistory = [];
-    const allGames = await Game.find().populate('xPlayer').populate('oPlayer');
+    const allGames = await Game.find().populate('xPlayer').populate('oPlayer').populate('board');
     for (let i = 0; i < allGames.length; i++) {
-        if (allGames[i].type === 'multiplayer' && (allGames[i].xPlayer === null || allGames[i].oPlayer === null))
+        const tmpGame = allGames[i];
+        if (tmpGame.type.toString() === "multiplayer" && (tmpGame.xPlayer === null || tmpGame.oPlayer === null))
             continue;
-        if (allGames[i].type === 'singleplayer' && allGames[i].xPlayer === req.body.playerId) {
-            gamesHistory.push(allGames[i]);
+        if (tmpGame.type.toString() === "singleplayer" && tmpGame.xPlayer._id.toString() === req.params.playerId.toString()) {
+            gamesHistory.push(tmpGame);
         }
-        else if (allGames[i].type === 'multiplayer' && (allGames[i].xPlayer === req.body.playerId || allGames[i].oPlayer === req.body.playerId)) {
-            gamesHistory.push(allGames[i]);
+        else if (tmpGame.type.toString() === "multiplayer" && (tmpGame.xPlayer._id.toString() === req.params.playerId.toString() || tmpGame.oPlayer._id.toString() === req.params.playerId.toString())) {
+            gamesHistory.push(tmpGame);
         }
     }
     res.send(gamesHistory);
 });
+async function deleteOthers(xPlayer) {
+    const allGames = await Game.find();
+    for (let i = 0; i < allGames.length; i++) {
+        if (allGames[i].xPlayer.toString() === xPlayer) {
+            const board = await Board.findById(allGames[i].board);
+            if (!board.isDraw && board.winner === null) {
+                await Game.findByIdAndDelete(allGames[i]._id);
+            }
+        }
+    }
+}
 router.post('/', auth, async (req, res) => {
     // const { error } = validate(req.body);
     // if(error) return res.status(400).send(error.details[0].message);
+    await deleteOthers(req.body.xPlayer);
     let board = new Board(_.pick(req.body, ['xPlayer']));
     board = await board.save();
     let game = new Game(_.pick(req.body, ['xPlayer', 'type']));

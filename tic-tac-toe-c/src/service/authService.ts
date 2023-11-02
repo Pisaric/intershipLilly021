@@ -15,6 +15,7 @@ export function loginWithJWT(jwt: string): void {
 
 export function logout(): void {
     localStorage.removeItem(tokenKey);
+    if(localStorage.getItem('game') !== null) localStorage.removeItem('game');
     window.location.reload();               
 }
 

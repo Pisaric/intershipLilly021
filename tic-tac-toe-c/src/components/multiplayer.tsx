@@ -74,7 +74,11 @@ class Multiplayer extends Component<{}, GameState> {
 			if(game === null) return;
 			localStorage.setItem('game', game._id);
 			this.setState({ game });
+			window.location.reload();  
 		});
+		//joinServer(); 					//ovo sam sada dodao
+		//connection('http://localhost:3000');
+    	//joinServer();
 	}
 
 	isValidMove = (game: IGame) : boolean => {

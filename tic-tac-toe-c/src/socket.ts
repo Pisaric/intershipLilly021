@@ -5,7 +5,7 @@ let socket: Socket | null = null;
 let joined = false;
 
 export function connection(url: string) {
-	if (socket !== null && socket.connected) {
+	if (socket?.connected) {
         console.log('Veza je već uspostavljena.');
         return;
     } else {
@@ -15,7 +15,7 @@ export function connection(url: string) {
     }
 
 	socket.on('connect', () => {
-		if (socket !== null && socket.connected) {
+		if (socket?.connected) {
 			console.log('Veza je već uspostavljena.');
 			return;
 		}
